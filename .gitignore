@@ -1,0 +1,8 @@
+yarn-error.log
+.cache
+.env
+node_modules
+.env.generated
+dist
+.mysql
+.grafana

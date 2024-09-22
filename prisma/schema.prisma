@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Activity {
+  id                     Int      @id @default(autoincrement())
+  strava_id              BigInt   @unique
+  name                   String
+  distance               Float
+  moving_time            Int
+  elapsed_time           Int
+  total_elevation_gain   Int
+  type                   String
+  sport_type             String
+  start_date             DateTime
+  start_date_local       DateTime
+  achievement_count      Int
+  kudos_count            Int
+  comment_count          Int
+  athlete_count          Int
+  photo_count            Int
+  average_speed          Float?
+  max_speed              Float?
+  average_cadence        Int?
+  average_temp           Float?
+  average_watts          Float?
+  max_watts              Int?
+  weighted_average_watts Int?
+  kilojoules             Float?
+  device_watts           Boolean?
+  has_heartrate          Boolean
+  average_heartrate      Float?
+  max_heartrate          Int?
+  elev_high              Float?
+  elev_low               Float?
+  pr_count               Int
+  suffer_score           Int?
+  calories               Int?
+  external_id            String?
+  device_name            String?
+  description            String?
+}
