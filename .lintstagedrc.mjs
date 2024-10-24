@@ -4,5 +4,5 @@ export default {
         'eslint -c eslint.config.mjs --fix',
         () => 'pnpm run checkTS',
     ],
-    '*.{schema,yml}': ['prettier --write'],
+    '*.{schema,yml,md}': ['prettier --write'],
 };

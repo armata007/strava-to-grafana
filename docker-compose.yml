@@ -31,7 +31,7 @@ services:
         ports:
             - ${DB_PORT_EXT}:${DB_PORT_INT}
         volumes:
-            - ./.mysql:/var/lib/mysql
+            - ${MYSQL_DATA_FOLDER}:/var/lib/mysql
             - ./docker/db/:/docker-entrypoint-initdb.d/
         networks:
             - web
@@ -50,7 +50,7 @@ services:
         ports:
             - ${GRAFANA_EXTERNAL_PORT}:3000
         volumes:
-            - ./.grafana:/var/lib/grafana
+            - ${GRAFANA_DATA_FOLDER}:/var/lib/grafana
         networks:
             - web
 networks:

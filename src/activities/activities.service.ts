@@ -80,9 +80,9 @@ export class ActivitiesService {
 
     private async getWorkouts(after?: number): Promise<Workout[]> {
         await this.tokenService.refreshToken();
+        const data: Workout[] = [];
         try {
             let page = 1;
-            let allActivities: Activity[] = [];
             let fetchMore = true;
             while (fetchMore) {
                 // eslint-disable-next-line no-console
@@ -102,28 +102,21 @@ export class ActivitiesService {
                 }
 
                 const activities = await response.json();
-                allActivities = allActivities.concat(activities);
 
-                if (activities.length < 100) {
-                    fetchMore = false;
-                } else {
-                    page += 1;
-                }
-            }
-
-            const detailedDataPromises = allActivities.map(
-                async (activity): Promise<Workout & { id: number }> => {
+                for (let i = 0; i < activities.length; i += 1) {
+                    const activity = activities[i];
                     if (isActivity(activity)) {
+                        let activityData: (Workout & { id: number }) | null = null;
                         const cachePath = path.join(
                             __dirname,
                             '..',
                             '..',
-                            '.cache',
+                            this.envsService.get('STRAVA_ACTIVITIES_CACHE_FOLDER'),
                             `${activity.id}.json`,
                         );
                         try {
                             const cachedData = await fs.readFile(cachePath, 'utf-8');
-                            return JSON.parse(cachedData);
+                            activityData = JSON.parse(cachedData);
                         } catch {
                             // eslint-disable-next-line no-console
                             console.log(`Downloading activity ${activity.id}`);
@@ -145,56 +138,61 @@ export class ActivitiesService {
 
                             const detailedData = await detailedResponse.json();
                             await fs.writeFile(cachePath, JSON.stringify(detailedData));
-                            return detailedData;
+                            activityData = detailedData;
                         }
-                    }
-                    return null;
-                },
-            );
 
-            const detailedData = await Promise.all(detailedDataPromises);
-            return detailedData.map((singleData) => ({
-                strava_id: singleData.id,
-                name: singleData.name,
-                start_date: singleData.start_date,
-                distance: singleData.distance,
-                moving_time: singleData.moving_time,
-                elapsed_time: singleData.elapsed_time,
-                total_elevation_gain: singleData.total_elevation_gain,
-                type: singleData.type,
-                calories: singleData.calories,
-                sport_type: singleData.sport_type,
-                start_date_local: singleData.start_date_local,
-                achievement_count: singleData.achievement_count,
-                kudos_count: singleData.kudos_count,
-                comment_count: singleData.comment_count,
-                athlete_count: singleData.athlete_count,
-                photo_count: singleData.photo_count,
-                average_speed: singleData.average_speed,
-                max_speed: singleData.max_speed,
-                average_cadence: singleData.average_cadence,
-                average_temp: singleData.average_temp,
-                average_watts: singleData.average_watts,
-                max_watts: singleData.max_watts,
-                weighted_average_watts: singleData.weighted_average_watts,
-                kilojoules: singleData.kilojoules,
-                device_watts: singleData.device_watts,
-                has_heartrate: singleData.has_heartrate,
-                average_heartrate: singleData.average_heartrate,
-                max_heartrate: singleData.max_heartrate,
-                elev_high: singleData.elev_high,
-                elev_low: singleData.elev_low,
-                pr_count: singleData.pr_count,
-                suffer_score: singleData.suffer_score,
-                external_id: singleData.external_id,
-                device_name: singleData.device_name,
-                description: singleData.description,
-            }));
+                        data.push({
+                            strava_id: activityData.id,
+                            name: activityData.name,
+                            start_date: activityData.start_date,
+                            distance: activityData.distance,
+                            moving_time: activityData.moving_time,
+                            elapsed_time: activityData.elapsed_time,
+                            total_elevation_gain: activityData.total_elevation_gain,
+                            type: activityData.type,
+                            calories: activityData.calories,
+                            sport_type: activityData.sport_type,
+                            start_date_local: activityData.start_date_local,
+                            achievement_count: activityData.achievement_count,
+                            kudos_count: activityData.kudos_count,
+                            comment_count: activityData.comment_count,
+                            athlete_count: activityData.athlete_count,
+                            photo_count: activityData.photo_count,
+                            average_speed: activityData.average_speed,
+                            max_speed: activityData.max_speed,
+                            average_cadence: activityData.average_cadence,
+                            average_temp: activityData.average_temp,
+                            average_watts: activityData.average_watts,
+                            max_watts: activityData.max_watts,
+                            weighted_average_watts: activityData.weighted_average_watts,
+                            kilojoules: activityData.kilojoules,
+                            device_watts: activityData.device_watts,
+                            has_heartrate: activityData.has_heartrate,
+                            average_heartrate: activityData.average_heartrate,
+                            max_heartrate: activityData.max_heartrate,
+                            elev_high: activityData.elev_high,
+                            elev_low: activityData.elev_low,
+                            pr_count: activityData.pr_count,
+                            suffer_score: activityData.suffer_score,
+                            external_id: activityData.external_id,
+                            device_name: activityData.device_name,
+                            description: activityData.description,
+                        });
+                    }
+                }
+
+                if (activities.length < 100) {
+                    fetchMore = false;
+                } else {
+                    page += 1;
+                }
+            }
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Error fetching activities:', error);
-            throw error;
+            return data;
         }
+        return data;
     }
 
     public importAllWorkouts = async (): Promise<void> => {
