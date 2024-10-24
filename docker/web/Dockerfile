@@ -6,7 +6,7 @@ RUN corepack enable
 
 WORKDIR /usr/src/app
 COPY . .
-RUN pnpm install --dev
+RUN pnpm install
 RUN pnpm run build
 
 FROM node:22.8.0
