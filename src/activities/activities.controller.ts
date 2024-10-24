@@ -10,7 +10,12 @@ export class ActivitiesController {
     @Get('activities/importAll')
     async importAllActivities(@Res() res: Response): Promise<Response | void> {
         try {
-            await this.activitiesService.importAllWorkouts();
+            const finished = await this.activitiesService.importAllWorkouts();
+            if (!finished) {
+                res.send(
+                    'Done, but there are still more activities left to import. Run this again in 15 minutes.',
+                );
+            }
         } catch (error) {
             // eslint-disable-next-line no-console
             console.log('ERROR', error);
@@ -22,7 +27,12 @@ export class ActivitiesController {
     @Get('activities/importNew')
     async importNewActivities(@Res() res: Response): Promise<Response | void> {
         try {
-            await this.activitiesService.importWorkoutsAfterLastInDb();
+            const finished = await this.activitiesService.importWorkoutsAfterLastInDb();
+            if (!finished) {
+                res.send(
+                    'Done, but there are still more activities left to import. Run this again in 15 minutes.',
+                );
+            }
         } catch (error) {
             // eslint-disable-next-line no-console
             console.log('ERROR', error);

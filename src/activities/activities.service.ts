@@ -78,7 +78,7 @@ export class ActivitiesService {
         }
     };
 
-    private async getWorkouts(after?: number): Promise<Workout[]> {
+    private async getWorkouts(after?: number): Promise<{ workouts: Workout[]; finished: boolean }> {
         await this.tokenService.refreshToken();
         const data: Workout[] = [];
         try {
@@ -190,29 +190,31 @@ export class ActivitiesService {
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Error fetching activities:', error);
-            return data;
+            return { workouts: data, finished: false };
         }
-        return data;
+        return { workouts: data, finished: true };
     }
 
-    public importAllWorkouts = async (): Promise<void> => {
+    public importAllWorkouts = async (): Promise<boolean> => {
         await this.tokenService.refreshToken();
-        const workouts = await this.getWorkouts();
+        const { workouts, finished } = await this.getWorkouts();
         await this.updateWorkoutsInDb(workouts);
+        return finished;
     };
 
-    public importWorkoutsAfterLastInDb = async (): Promise<void> => {
+    public importWorkoutsAfterLastInDb = async (): Promise<boolean> => {
         await this.tokenService.refreshToken();
         const prisma = new PrismaClient();
         const lastWorkout = await prisma.activity.findFirst({ orderBy: { start_date: 'desc' } });
         if (!lastWorkout) {
-            await this.importAllWorkouts();
-        } else {
-            const workouts = await this.getWorkouts(
-                lastWorkout.start_date.getTime() / 1000 - 24 * 60 * 60,
-            );
-            await this.updateWorkoutsInDb(workouts);
+            const finished = await this.importAllWorkouts();
+            return finished;
         }
+        const { workouts, finished } = await this.getWorkouts(
+            lastWorkout.start_date.getTime() / 1000 - 24 * 60 * 60,
+        );
+        await this.updateWorkoutsInDb(workouts);
+        return finished;
     };
 
     @Cron(process.env.STRAVA_CRON_GET_FREQUENCY)
