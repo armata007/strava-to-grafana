@@ -1,0 +1,4 @@
+*.sock
+.mysql
+.grafana
+.cache
