@@ -3,9 +3,7 @@
 ## TODO before pushing:
 
 -   refactor downloading all workouts (from 0)
--   typecheck
 -   gh actions
--   husky
 
 ## TODO
 

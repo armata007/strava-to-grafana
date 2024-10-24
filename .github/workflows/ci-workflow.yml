@@ -1,0 +1,53 @@
+name: CI Workflow
+
+on:
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [22.8.0]
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: Cache pnpm dependencies
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/.pnpm-store
+                      node_modules
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
+
+            - name: Install pnpm
+              run: npm install -g pnpm
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Run TypeScript Check
+              run: pnpm checkTS
+
+            - name: Run Lint
+              run: pnpm lint
+
+            - name: Run Prettier
+              run: pnpm prettier
+
+            - name: Git diff
+              run: git diff --exit-code
