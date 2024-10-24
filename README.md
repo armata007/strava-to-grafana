@@ -1,10 +1,5 @@
 # Strava to Grafana app
 
-## TODO before pushing:
-
--   refactor downloading all workouts (from 0)
--   gh actions
-
 ## TODO
 
 -   Add setup guide to readme (strava tokens, how to run in docker etc)
