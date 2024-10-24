@@ -10,7 +10,7 @@
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
         "preprod": "prisma migrate deploy",
-        "prod": "NODE_ENV=production node build/src/main.js",
+        "prod": "NODE_ENV=production node dist/main.js",
         "start:prod": "node dist/main",
         "prettier": "prettier --write src",
         "docker:start-db": "docker-compose up -d db",
