@@ -24,5 +24,5 @@ COPY --from=builder /usr/src/app/pnpm-lock.yaml .
 COPY --from=builder /usr/src/app/prisma .
 COPY --from=builder /usr/src/app/.env .
 COPY --from=builder /usr/src/app/.env.generated .
-RUN pnpm install --prod
+RUN pnpm install
 CMD [ "pnpm", "run" ,"start:prod" ]
