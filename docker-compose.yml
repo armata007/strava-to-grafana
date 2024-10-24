@@ -16,6 +16,7 @@ services:
             - ${STRAVA_ACTIVITIES_CACHE_FOLDER}:/usr/src/app/.cache
         environment:
             - DATABASE_URL=${DATABASE_URL_DOCKER}
+            - HUSKY=0
     db:
         image: percona:8.0
         command: ['--default_authentication_plugin=caching_sha2_password']
