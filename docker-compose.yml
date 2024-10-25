@@ -14,6 +14,7 @@ services:
             - web
         volumes:
             - ${STRAVA_ACTIVITIES_CACHE_FOLDER}:/usr/src/app/.cache
+            - ./.env.generated:/usr/src/app/.env.generated
         environment:
             - DATABASE_URL=${DATABASE_URL_DOCKER}
             - HUSKY=0

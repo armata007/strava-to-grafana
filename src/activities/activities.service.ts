@@ -78,7 +78,32 @@ export class ActivitiesService {
         }
     };
 
-    private async getWorkouts(after?: number): Promise<{ workouts: Workout[]; finished: boolean }> {
+    public async fetchStravaApi({
+        after,
+        perPage = 100,
+        page,
+    }: {
+        after?: number;
+        perPage?: number;
+        page: number;
+    }): Promise<Response> {
+        return fetch(
+            `https://www.strava.com/api/v3/athlete/activities?page=${page}&per_page=${perPage}${after > 0 ? `&after=${after}` : ''}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${this.envsService.get('ACCESS_TOKEN')}`,
+                },
+            },
+        );
+    }
+
+    private async getWorkouts({
+        after,
+        perPage = 100,
+    }: {
+        after?: number;
+        perPage?: number;
+    }): Promise<{ workouts: Workout[]; finished: boolean }> {
         await this.tokenService.refreshToken();
         const data: Workout[] = [];
         try {
@@ -87,14 +112,7 @@ export class ActivitiesService {
             while (fetchMore) {
                 // eslint-disable-next-line no-console
                 console.log(`Getting page ${page} of activities`);
-                const response = await fetch(
-                    `https://www.strava.com/api/v3/athlete/activities?page=${page}&per_page=100${after > 0 ? `&after=${after}` : ''}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${this.envsService.get('ACCESS_TOKEN')}`,
-                        },
-                    },
-                );
+                const response = await this.fetchStravaApi({ after, perPage, page });
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -197,7 +215,7 @@ export class ActivitiesService {
 
     public importAllWorkouts = async (): Promise<boolean> => {
         await this.tokenService.refreshToken();
-        const { workouts, finished } = await this.getWorkouts();
+        const { workouts, finished } = await this.getWorkouts({});
         await this.updateWorkoutsInDb(workouts);
         return finished;
     };
@@ -210,9 +228,9 @@ export class ActivitiesService {
             const finished = await this.importAllWorkouts();
             return finished;
         }
-        const { workouts, finished } = await this.getWorkouts(
-            lastWorkout.start_date.getTime() / 1000 - 24 * 60 * 60,
-        );
+        const { workouts, finished } = await this.getWorkouts({
+            after: lastWorkout.start_date.getTime() / 1000 - 24 * 60 * 60,
+        });
         await this.updateWorkoutsInDb(workouts);
         return finished;
     };
