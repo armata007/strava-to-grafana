@@ -28,7 +28,7 @@ export class HealthcheckController {
         const activities = await prisma.activity.count();
 
         try {
-            this.tokenService.refreshToken();
+            await this.tokenService.refreshToken();
             const strava = await this.activitiesService.fetchStravaApi({ perPage: 1, page: 1 });
             if (!strava.ok || strava.status !== 200) {
                 throw new Error(`Strava error. Status: ${strava.status}. OK: ${strava.ok}`);

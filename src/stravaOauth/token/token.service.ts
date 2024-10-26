@@ -60,6 +60,8 @@ export class TokenService {
             // eslint-disable-next-line no-console
             console.log('Token refresh not necessary');
         } else {
+            // eslint-disable-next-line no-console
+            console.log('Token refresh necessary');
             try {
                 const response = await fetch(getStravaUrl('token'), {
                     method: 'POST',
