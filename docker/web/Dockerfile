@@ -5,8 +5,11 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 WORKDIR /usr/src/app
-COPY . .
+COPY package.json .
+COPY pnpm-lock.yaml .
+COPY prisma .
 RUN pnpm install
+COPY . .
 RUN pnpm run build
 
 FROM node:22.8.0
@@ -24,5 +27,6 @@ COPY --from=builder /usr/src/app/pnpm-lock.yaml .
 COPY --from=builder /usr/src/app/prisma .
 COPY --from=builder /usr/src/app/.env .
 COPY --from=builder /usr/src/app/.env.generated .
+COPY --from=builder /usr/src/app/node_modules .
 RUN pnpm install
 CMD [ "pnpm", "run" ,"prod" ]
