@@ -1367,8 +1367,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1478,8 +1477,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1589,8 +1587,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1700,8 +1697,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1811,8 +1807,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1935,8 +1930,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2046,8 +2040,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2157,8 +2150,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2268,8 +2260,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2379,8 +2370,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2462,7 +2452,7 @@
             {
                 "allValue": "'All'",
                 "current": {
-                    "selected": false,
+                    "selected": true,
                     "text": ["All"],
                     "value": ["$__all"]
                 },
@@ -2487,7 +2477,7 @@
             {
                 "allValue": "'All'",
                 "current": {
-                    "selected": false,
+                    "selected": true,
                     "text": ["All"],
                     "value": ["$__all"]
                 },
@@ -2508,6 +2498,27 @@
                 "skipUrlSync": false,
                 "sort": 1,
                 "type": "query"
+            },
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": false,
+                    "text": "Long run",
+                    "value": "Long run"
+                },
+                "definition": "SELECT DISTINCT \n    CASE \n        WHEN workout_type = 2 THEN 'Long run'\n        WHEN workout_type IN (1,11) THEN 'Race'\n        WHEN workout_type IN (12, 3) THEN 'Workout'\n        ELSE 'Other' \n    END AS workout_type_label\nFROM Activity \nWHERE workout_type IS NOT NULL \n  AND workout_type NOT IN (10, 0);",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Workout type",
+                "multi": true,
+                "name": "workout_type",
+                "options": [],
+                "query": "SELECT DISTINCT \n    CASE \n        WHEN workout_type = 2 THEN 'Long run'\n        WHEN workout_type IN (1,11) THEN 'Race'\n        WHEN workout_type IN (12, 3) THEN 'Workout'\n        ELSE 'Other' \n    END AS workout_type_label\nFROM Activity \nWHERE workout_type IS NOT NULL \n  AND workout_type NOT IN (10, 0);",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
             }
         ]
     },
@@ -2519,6 +2530,6 @@
     "timezone": "browser",
     "title": "Calories",
     "uid": "fdxyz5yohyuiof",
-    "version": 3,
+    "version": 6,
     "weekStart": ""
 }

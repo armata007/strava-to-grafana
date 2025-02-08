@@ -121,7 +121,71 @@
     "schemaVersion": 39,
     "tags": [],
     "templating": {
-        "list": []
+        "list": [
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": false,
+                    "text": "Squash",
+                    "value": "Squash"
+                },
+                "definition": "SELECT DISTINCT sport_type From Activity",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Sport type",
+                "multi": true,
+                "name": "sport_type",
+                "options": [],
+                "query": "SELECT DISTINCT sport_type From Activity",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            },
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": false,
+                    "text": "Workout",
+                    "value": "Workout"
+                },
+                "definition": "SELECT DISTINCT type From Activity",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Type",
+                "multi": true,
+                "name": "regular_type",
+                "options": [],
+                "query": "SELECT DISTINCT type From Activity",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            },
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": false,
+                    "text": "All",
+                    "value": "$__all"
+                },
+                "definition": "SELECT DISTINCT \n    CASE \n        WHEN workout_type = 2 THEN 'Long run'\n        WHEN workout_type IN (1,11) THEN 'Race'\n        WHEN workout_type IN (12, 3) THEN 'Workout'\n        ELSE 'Other' \n    END AS workout_type_label\nFROM Activity \nWHERE workout_type IS NOT NULL \n  AND workout_type NOT IN (10, 0);",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Workout type",
+                "multi": true,
+                "name": "workout_type",
+                "options": [],
+                "query": "SELECT DISTINCT \n    CASE \n        WHEN workout_type = 2 THEN 'Long run'\n        WHEN workout_type IN (1,11) THEN 'Race'\n        WHEN workout_type IN (12, 3) THEN 'Workout'\n        ELSE 'Other' \n    END AS workout_type_label\nFROM Activity \nWHERE workout_type IS NOT NULL \n  AND workout_type NOT IN (10, 0);",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            }
+        ]
     },
     "time": {
         "from": "now-6h",
@@ -129,8 +193,8 @@
     },
     "timepicker": {},
     "timezone": "browser",
-    "title": "Distance2",
+    "title": "Distance",
     "uid": "aechh8850k9a8c",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
 }
