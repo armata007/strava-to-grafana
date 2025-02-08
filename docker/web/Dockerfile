@@ -13,10 +13,10 @@ RUN pnpm --version
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
-COPY package.json pnpm-lock.yaml .
+COPY package.json pnpm-lock.yaml ./
 COPY prisma prisma
 RUN pnpm install
-COPY nest-cli.json tsconfig.json tsconfig.build.json .env .env.generated .
+COPY nest-cli.json tsconfig.json tsconfig.build.json .env .env.generated ./
 COPY src src
 RUN ls -la
 RUN pnpm install
