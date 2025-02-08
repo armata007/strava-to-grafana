@@ -1326,8 +1326,8 @@
                 "allValue": "'All'",
                 "current": {
                     "selected": true,
-                    "text": ["Squash"],
-                    "value": ["Squash"]
+                    "text": ["All"],
+                    "value": ["$__all"]
                 },
                 "datasource": {
                     "type": "mysql",
@@ -1350,7 +1350,7 @@
             {
                 "allValue": "'All'",
                 "current": {
-                    "selected": true,
+                    "selected": false,
                     "text": ["All"],
                     "value": ["$__all"]
                 },
@@ -1382,6 +1382,6 @@
     "timezone": "browser",
     "title": "Calories",
     "uid": "fdxyz5yohyuiof",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
 }
