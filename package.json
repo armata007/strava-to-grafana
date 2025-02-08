@@ -43,6 +43,7 @@
         "strava-v3": "^2.2.1"
     },
     "devDependencies": {
+        "@eslint/eslintrc": "^3.2.0",
         "@nestjs/cli": "^10.4.5",
         "@nestjs/schematics": "^10.2.2",
         "@nestjs/testing": "^10.4.6",
