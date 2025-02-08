@@ -55,5 +55,19 @@ services:
             - ${GRAFANA_DATA_FOLDER}:/var/lib/grafana
         networks:
             - web
+    prisma-studio:
+        image: node:22.8.0
+        working_dir: /usr/src/app
+        volumes:
+            - .:/usr/src/app
+        command: ['npx', 'prisma', 'studio']
+        environment:
+            - DATABASE_URL=${DATABASE_URL_DOCKER}
+        ports:
+            - '3671:5555'
+        networks:
+            - web
+        depends_on:
+            - db
 networks:
     web:
