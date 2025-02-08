@@ -44,4 +44,5 @@ model Activity {
   external_id            String?
   device_name            String?
   description            String?
+  workout_type           Int?
 }
