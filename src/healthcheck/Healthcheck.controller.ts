@@ -1,7 +1,10 @@
+import * as fsAll from 'fs';
+import * as path from 'path';
 import { Controller, Get, InternalServerErrorException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 import { ActivitiesService } from '../activities/activities.service';
+import { DynamicConfigService } from '../envs.service';
 import { TokenService } from '../stravaOauth/token/token.service';
 
 @Controller('healthcheck')
@@ -9,6 +12,7 @@ export class HealthcheckController {
     constructor(
         private readonly activitiesService: ActivitiesService,
         private tokenService: TokenService,
+        private envsService: DynamicConfigService,
     ) {}
 
     @Get()
@@ -17,6 +21,7 @@ export class HealthcheckController {
         activities: number;
         statusCode: 200;
         strava: boolean;
+        numberOfFilesInCache: number;
     }> {
         const prisma = new PrismaClient();
         try {
@@ -37,11 +42,27 @@ export class HealthcheckController {
             throw new InternalServerErrorException(`Strava error - ${error}`);
         }
 
+        let numberOfFilesInCache = 0;
+
+        try {
+            const cachePath = path.join(
+                __dirname,
+                '..',
+                '..',
+                this.envsService.get('STRAVA_ACTIVITIES_CACHE_FOLDER'),
+            );
+            const files = await fsAll.promises.readdir(cachePath);
+            numberOfFilesInCache = files.length;
+        } catch (error) {
+            throw new InternalServerErrorException(`Number of files in cache error - ${error}`);
+        }
+
         return {
             dbConnection: true,
             activities,
             statusCode: 200,
             strava: true,
+            numberOfFilesInCache,
         };
     }
 }
