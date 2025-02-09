@@ -18,6 +18,7 @@ COPY prisma prisma
 RUN pnpm install
 COPY nest-cli.json tsconfig.json tsconfig.build.json .env .env.generated ./
 COPY src src
+COPY . .
 RUN ls -la
 RUN pnpm install
 RUN pnpm run build
