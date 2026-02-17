@@ -137,7 +137,9 @@ export class ActivitiesService {
                         try {
                             const cachedData = await fs.readFile(cachePath, 'utf-8');
                             activityData = JSON.parse(cachedData);
-                        } catch {
+                        } catch (error) {
+                            // eslint-disable-next-line no-console
+                            console.log(error);
                             // eslint-disable-next-line no-console
                             console.log(`Downloading activity ${activity.id}`);
                             const detailedResponse = await fetch(
