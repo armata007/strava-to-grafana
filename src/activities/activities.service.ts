@@ -50,6 +50,7 @@ type Workout = {
     device_name: string;
     description: string;
     workout_type: number | null;
+    trainer?: boolean;
 };
 
 const isActivity = (activity: unknown): activity is Activity => {
@@ -197,6 +198,7 @@ export class ActivitiesService {
                             device_name: activityData.device_name,
                             description: activityData.description,
                             workout_type: activityData.workout_type || null,
+                            trainer: activityData.trainer || false,
                         });
                     }
                 }

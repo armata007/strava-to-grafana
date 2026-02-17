@@ -45,4 +45,5 @@ model Activity {
   device_name            String?
   description            String?
   workout_type           Int?
+  trainer                Boolean?  @default(false)
 }
