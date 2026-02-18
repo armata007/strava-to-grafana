@@ -412,7 +412,7 @@
                 "x": 0,
                 "y": 8
             },
-            "id": 5,
+            "id": 6,
             "options": {
                 "minVizHeight": 75,
                 "minVizWidth": 75,
@@ -501,7 +501,7 @@
                 "x": 6,
                 "y": 8
             },
-            "id": 7,
+            "id": 5,
             "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -560,8 +560,11 @@
             },
             "fieldConfig": {
                 "defaults": {
+                    "custom": {
+                        "neutral": 2
+                    },
                     "mappings": [],
-                    "max": 43,
+                    "max": 40,
                     "min": 0,
                     "thresholds": {
                         "mode": "percentage",
@@ -589,7 +592,7 @@
                 "x": 12,
                 "y": 8
             },
-            "id": 6,
+            "id": 7,
             "options": {
                 "minVizHeight": 75,
                 "minVizWidth": 75,
@@ -650,7 +653,7 @@
                         "mode": "thresholds"
                     },
                     "mappings": [],
-                    "max": 500,
+                    "max": 32,
                     "min": 0,
                     "thresholds": {
                         "mode": "percentage",
