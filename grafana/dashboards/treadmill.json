@@ -734,13 +734,13 @@
         "list": []
     },
     "time": {
-        "from": "now-6M",
+        "from": "2026-01-27T23:00:00.000Z",
         "to": "now"
     },
     "timepicker": {},
     "timezone": "browser",
     "title": "Treadmill",
     "uid": "dfdipjb9oxwqoe",
-    "version": 3,
+    "version": 4,
     "weekStart": ""
 }
