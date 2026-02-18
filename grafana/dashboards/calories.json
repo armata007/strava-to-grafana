@@ -18,10 +18,23 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 6,
+    "id": 2,
     "links": [],
     "panels": [
         {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 15,
+            "panels": [],
+            "title": "General",
+            "type": "row"
+        },
+        {
             "datasource": {
                 "default": true,
                 "type": "mysql",
@@ -29,23 +42,53 @@
             },
             "fieldConfig": {
                 "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
                     "mappings": [],
-                    "max": 32,
-                    "min": 0,
                     "thresholds": {
-                        "mode": "percentage",
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
                                 "value": null
                             },
                             {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
                                 "color": "red",
-                                "value": 85
+                                "value": 80
                             }
                         ]
                     }
@@ -54,28 +97,26 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 6,
+                "w": 12,
                 "x": 0,
-                "y": 0
+                "y": 1
             },
-            "id": 1,
+            "id": 14,
             "options": {
-                "minVizHeight": 75,
-                "minVizWidth": 75,
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": ["lastNotNull"],
-                    "fields": "",
-                    "values": false
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
                 },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sizing": "auto"
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
             },
-            "pluginVersion": "11.2.0",
             "targets": [
                 {
-                    "dataset": "mysql",
+                    "dataset": "stravaapp",
                     "datasource": {
                         "type": "mysql",
                         "uid": "P430005175C4C7810"
@@ -83,29 +124,38 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n    4600 / (SUM(distance) / 1000) AS value\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';",
+                    "rawSql": "SELECT \n    DATE(start_date) AS \"time\",\n    SUM(elapsed_time) / 3600 AS duration_hours_per_day\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    elapsed_time > 0\nGROUP BY DATE(start_date)\nORDER BY DATE(start_date);",
                     "refId": "A",
                     "sql": {
                         "columns": [
                             {
-                                "parameters": [],
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
                                 "type": "function"
                             }
                         ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
+                        "groupBy": [],
                         "limit": 50
-                    }
+                    },
+                    "table": "Activity"
                 }
             ],
-            "title": "Cost per km",
-            "type": "gauge"
+            "title": "Duration per day",
+            "type": "timeseries"
         },
         {
             "datasource": {
@@ -119,22 +169,16 @@
                         "mode": "thresholds"
                     },
                     "mappings": [],
-                    "max": 32,
-                    "min": 0,
                     "thresholds": {
-                        "mode": "percentage",
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
                                 "value": null
                             },
                             {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
                                 "color": "red",
-                                "value": 85
+                                "value": 80
                             }
                         ]
                     }
@@ -143,363 +187,9 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 6,
-                "x": 6,
-                "y": 0
-            },
-            "id": 3,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "percentChangeColorMode": "standard",
-                "reduceOptions": {
-                    "calcs": ["lastNotNull"],
-                    "fields": "",
-                    "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "auto",
-                "wideLayout": true
-            },
-            "pluginVersion": "11.2.0",
-            "targets": [
-                {
-                    "dataset": "mysql",
-                    "datasource": {
-                        "type": "mysql",
-                        "uid": "P430005175C4C7810"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n    (SUM(distance) / 1000) AS value\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "Number of km",
-            "type": "stat"
-        },
-        {
-            "datasource": {
-                "default": true,
-                "type": "mysql",
-                "uid": "P430005175C4C7810"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "mappings": [],
-                    "max": 500,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "percentage",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
-                                "color": "red",
-                                "value": 85
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
+                "w": 7,
                 "x": 12,
-                "y": 0
-            },
-            "id": 2,
-            "options": {
-                "minVizHeight": 75,
-                "minVizWidth": 75,
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": ["lastNotNull"],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sizing": "auto"
-            },
-            "pluginVersion": "11.2.0",
-            "targets": [
-                {
-                    "dataset": "mysql",
-                    "datasource": {
-                        "type": "mysql",
-                        "uid": "P430005175C4C7810"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n    4600 / COUNT(*) AS value\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';\n",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "Cost per workout",
-            "type": "gauge"
-        },
-        {
-            "datasource": {
-                "default": true,
-                "type": "mysql",
-                "uid": "P430005175C4C7810"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "max": 500,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "percentage",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
-                                "color": "red",
-                                "value": 85
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 18,
-                "y": 0
-            },
-            "id": 4,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "percentChangeColorMode": "standard",
-                "reduceOptions": {
-                    "calcs": ["lastNotNull"],
-                    "fields": "",
-                    "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "auto",
-                "wideLayout": true
-            },
-            "pluginVersion": "11.2.0",
-            "targets": [
-                {
-                    "dataset": "mysql",
-                    "datasource": {
-                        "type": "mysql",
-                        "uid": "P430005175C4C7810"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n    COUNT(*) AS value\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';\n",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "Number of workouts",
-            "type": "stat"
-        },
-        {
-            "datasource": {
-                "default": true,
-                "type": "mysql",
-                "uid": "P430005175C4C7810"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "mappings": [],
-                    "max": 350,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "percentage",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
-                                "color": "red",
-                                "value": 85
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 0,
-                "y": 8
-            },
-            "id": 6,
-            "options": {
-                "minVizHeight": 75,
-                "minVizWidth": 75,
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": ["lastNotNull"],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sizing": "auto"
-            },
-            "pluginVersion": "11.2.0",
-            "targets": [
-                {
-                    "dataset": "mysql",
-                    "datasource": {
-                        "type": "mysql",
-                        "uid": "P430005175C4C7810"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n    ROUND(4600 / (SUM(elapsed_time) / 3600.0), 2) AS cost_per_hour\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';\n",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "Cost per hour",
-            "type": "gauge"
-        },
-        {
-            "datasource": {
-                "default": true,
-                "type": "mysql",
-                "uid": "P430005175C4C7810"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "max": 32,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "percentage",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
-                                "color": "red",
-                                "value": 85
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 6,
-                "y": 8
+                "y": 1
             },
             "id": 5,
             "options": {
@@ -520,7 +210,7 @@
             "pluginVersion": "11.2.0",
             "targets": [
                 {
-                    "dataset": "mysql",
+                    "dataset": "stravaapp",
                     "datasource": {
                         "type": "mysql",
                         "uid": "P430005175C4C7810"
@@ -528,118 +218,38 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n    ROUND(SUM(elapsed_time) / 3600.0, 2) AS total_hours\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';\n",
+                    "rawSql": "SELECT\nCOUNT(calories)\nFROM stravaapp.Activity\nWHERE \n(\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n(\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n(\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n(\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\nstart_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\ncalories > 0",
                     "refId": "A",
                     "sql": {
                         "columns": [
                             {
-                                "parameters": [],
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
                                 "type": "function"
                             }
                         ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
+                        "groupBy": [],
                         "limit": 50
-                    }
+                    },
+                    "table": "Activity"
                 }
             ],
-            "title": "Number of hours",
+            "title": "Activities number",
             "type": "stat"
-        },
-        {
-            "datasource": {
-                "default": true,
-                "type": "mysql",
-                "uid": "P430005175C4C7810"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "custom": {
-                        "neutral": 2
-                    },
-                    "mappings": [],
-                    "max": 40,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "percentage",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
-                                "color": "red",
-                                "value": 85
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 12,
-                "y": 8
-            },
-            "id": 7,
-            "options": {
-                "minVizHeight": 75,
-                "minVizWidth": 75,
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": ["lastNotNull"],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sizing": "auto"
-            },
-            "pluginVersion": "11.2.0",
-            "targets": [
-                {
-                    "dataset": "mysql",
-                    "datasource": {
-                        "type": "mysql",
-                        "uid": "P430005175C4C7810"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n    ROUND(4600 / SUM(calories) * 100, 2) AS cost_per_100cal\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';\n",
-                    "refId": "A",
-                    "sql": {
-                        "columns": [
-                            {
-                                "parameters": [],
-                                "type": "function"
-                            }
-                        ],
-                        "groupBy": [
-                            {
-                                "property": {
-                                    "type": "string"
-                                },
-                                "type": "groupBy"
-                            }
-                        ],
-                        "limit": 50
-                    }
-                }
-            ],
-            "title": "Cost per 100 calories",
-            "type": "gauge"
         },
         {
             "datasource": {
@@ -653,22 +263,16 @@
                         "mode": "thresholds"
                     },
                     "mappings": [],
-                    "max": 32,
-                    "min": 0,
                     "thresholds": {
-                        "mode": "percentage",
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
                                 "value": null
                             },
                             {
-                                "color": "orange",
-                                "value": 70
-                            },
-                            {
                                 "color": "red",
-                                "value": 85
+                                "value": 80
                             }
                         ]
                     }
@@ -677,9 +281,866 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 6,
-                "x": 18,
-                "y": 8
+                "w": 5,
+                "x": 19,
+                "y": 1
+            },
+            "id": 10,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.2.0",
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\n    AVG(elapsed_time) / 3600 AS avg_duration_hours\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    start_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\n    elapsed_time > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Average duration",
+            "type": "stat"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 9
+            },
+            "id": 11,
+            "panels": [],
+            "title": "Calories",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 10
+            },
+            "id": 2,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT calories, start_date AS \"time\"\nFROM stravaapp.Activity WHERE\n(\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n(\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n(\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n(\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\ncalories > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Calories per day",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 10
+            },
+            "id": 1,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.2.0",
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\nSUM(calories)\nFROM stravaapp.Activity\nWHERE \n(\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n(\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n(\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n(\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\nstart_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\ncalories > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Calories sum",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 0,
+                "y": 18
+            },
+            "id": 3,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.2.0",
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\nMIN(calories)\nFROM stravaapp.Activity\nWHERE \n(\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n(\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n(\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n(\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\nstart_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\ncalories > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Calories min",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 7,
+                "x": 5,
+                "y": 18
+            },
+            "id": 4,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.2.0",
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\nMAX(calories)\nFROM stravaapp.Activity\nWHERE \n(\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n(\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n(\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n(\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\nstart_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\ncalories > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Calories max",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 12,
+                "y": 18
+            },
+            "id": 6,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.2.0",
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\nAVG(calories)\nFROM stravaapp.Activity\nWHERE \n(\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n(\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n(\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n(\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\nstart_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\ncalories > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Calories avg",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "max"
+                        },
+                        "properties": [
+                            {
+                                "id": "max"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "min"
+                        },
+                        "properties": [
+                            {
+                                "id": "min"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 7,
+                "x": 17,
+                "y": 18
+            },
+            "id": 7,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "/^avg$/",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": false,
+                "sizing": "auto"
+            },
+            "pluginVersion": "11.2.0",
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\nMIN(calories) as min,\nMAX(calories) as max,\nAVG(calories) as avg\nFROM stravaapp.Activity\nWHERE \n(\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n(\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n(\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n(\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\nstart_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\ncalories > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "avg calories in min/max",
+            "type": "gauge"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 25
+            },
+            "id": 12,
+            "panels": [],
+            "title": "Per hour",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 26
+            },
+            "id": 13,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    start_date AS \"time\",\n    calories / (elapsed_time / 3600) AS calories_per_hour\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    calories > 0 AND\n    elapsed_time > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Calories per hour",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 5,
+                "x": 12,
+                "y": 26
             },
             "id": 8,
             "options": {
@@ -700,6 +1161,255 @@
             "pluginVersion": "11.2.0",
             "targets": [
                 {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\n    SUM(calories) / (SUM(elapsed_time) / 3600) AS avg_calories_per_hour\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    start_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\n    calories > 0 AND\n    elapsed_time > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "Calories avg per hour",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "max"
+                        },
+                        "properties": [
+                            {
+                                "id": "max"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "min"
+                        },
+                        "properties": [
+                            {
+                                "id": "min"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 7,
+                "x": 17,
+                "y": 26
+            },
+            "id": 9,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": ["lastNotNull"],
+                    "fields": "/^avg$/",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": false,
+                "sizing": "auto"
+            },
+            "pluginVersion": "11.2.0",
+            "targets": [
+                {
+                    "dataset": "stravaapp",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT\n    MIN(calories / (elapsed_time / 3600)) AS min,\n    MAX(calories / (elapsed_time / 3600)) AS max,\n    SUM(calories) / (SUM(elapsed_time) / 3600) AS avg\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    start_date BETWEEN FROM_UNIXTIME(${__from} / 1000) AND FROM_UNIXTIME(${__to} / 1000) AND\n    calories > 0 AND\n    elapsed_time > 0",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [
+                                    {
+                                        "name": "calories",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            },
+                            {
+                                "alias": "\"time\"",
+                                "parameters": [
+                                    {
+                                        "name": "start_date",
+                                        "type": "functionParameter"
+                                    }
+                                ],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [],
+                        "limit": 50
+                    },
+                    "table": "Activity"
+                }
+            ],
+            "title": "avg calories in min/max per hour",
+            "type": "gauge"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 34
+            },
+            "id": 16,
+            "panels": [],
+            "title": "Calories per sport_type",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "fieldMinMax": false,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 35
+            },
+            "id": 17,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
                     "dataset": "mysql",
                     "datasource": {
                         "type": "mysql",
@@ -708,7 +1418,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n    SUM(calories) AS total_calories\nFROM stravaapp.Activity\nWHERE trainer = TRUE\n  AND type = 'Run'\n  AND start_date > '2026-01-28';\n",
+                    "rawSql": "SELECT \n    sport_type, \n    SUM(calories) AS total_calories\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    calories > 0\nGROUP BY sport_type\nORDER BY total_calories DESC",
                     "refId": "A",
                     "sql": {
                         "columns": [
@@ -729,23 +1439,1137 @@
                     }
                 }
             ],
-            "title": "Number of calories",
-            "type": "stat"
+            "title": "Calories per sport_type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 43
+            },
+            "id": 24,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    sport_type, \n    SUM(elapsed_time) / 3600 AS total_duration_hours\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    elapsed_time > 0\nGROUP BY sport_type\nORDER BY total_duration_hours DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Duration per sport_type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 51
+            },
+            "id": 18,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    sport_type, \n    SUM(calories) / (SUM(elapsed_time) / 3600) AS avg_calories_per_hour\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    calories > 0 AND\n    elapsed_time > 0\nGROUP BY sport_type\nORDER BY avg_calories_per_hour DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Calories per hour per sport_type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 59
+            },
+            "id": 19,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    sport_type, \n    AVG(calories) AS avg_calories_per_workout\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    calories > 0\nGROUP BY sport_type\nORDER BY avg_calories_per_workout DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Avg calories per sport_type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 67
+            },
+            "id": 25,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    sport_type, \n    AVG(elapsed_time) / 3600 AS avg_duration_hours\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    elapsed_time > 0\nGROUP BY sport_type\nORDER BY avg_duration_hours DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Avg duration per sport_type",
+            "type": "barchart"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 75
+            },
+            "id": 20,
+            "panels": [],
+            "title": "Calories per type",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 76
+            },
+            "id": 21,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    type, \n    SUM(calories) AS total_calories\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    calories > 0\nGROUP BY type\nORDER BY total_calories DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Calories per type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 84
+            },
+            "id": 26,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    type, \n    SUM(elapsed_time) / 3600 AS total_duration_hours\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    elapsed_time > 0\nGROUP BY type\nORDER BY total_duration_hours DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Duration per type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 92
+            },
+            "id": 22,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    type, \n    SUM(calories) / (SUM(elapsed_time) / 3600) AS avg_calories_per_hour\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    calories > 0 AND\n    elapsed_time > 0\nGROUP BY type\nORDER BY avg_calories_per_hour DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Calories per hour per type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 100
+            },
+            "id": 23,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    type, \n    AVG(calories) AS avg_calories_per_workout\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    calories > 0\nGROUP BY type\nORDER BY avg_calories_per_workout DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Avg calories per type",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "default": true,
+                "type": "mysql",
+                "uid": "P430005175C4C7810"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 108
+            },
+            "id": 27,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "dataset": "mysql",
+                    "datasource": {
+                        "type": "mysql",
+                        "uid": "P430005175C4C7810"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT \n    sport_type, \n    AVG(elapsed_time) / 3600 AS avg_duration_hours\nFROM stravaapp.Activity\nWHERE \n    (\"${sport_type:csv_string}\" = \"'All'\" OR sport_type IN (${sport_type:sqlstring})) AND\n    (\"${regular_type:csv_string}\" = \"'All'\" OR type IN (${regular_type:sqlstring})) AND\n    (\"${trainer:csv_string}\" = \"'All'\" OR trainer IN (${trainer:sqlstring})) AND\n    (\"${workout_type:csv_string}\" = \"'All'\" OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Long run%\" THEN 2\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 1\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 3\n                ELSE NULL\n            END\n        ) OR workout_type IN (\n            CASE\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Race%\" THEN 11\n                WHEN \"${workout_type:csv_string}\" LIKE \"%Workout%\" THEN 12\n                ELSE NULL\n            END\n        )\n    ) AND\n    elapsed_time > 0\nGROUP BY sport_type\nORDER BY avg_duration_hours DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                        ],
+                        "groupBy": [
+                            {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                        ],
+                        "limit": 50
+                    }
+                }
+            ],
+            "title": "Avg duration per type",
+            "type": "barchart"
         }
     ],
+    "refresh": "",
     "schemaVersion": 39,
-    "tags": [],
+    "tags": ["strava"],
     "templating": {
-        "list": []
+        "list": [
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": false,
+                    "text": ["All"],
+                    "value": ["$__all"]
+                },
+                "datasource": {
+                    "type": "mysql",
+                    "uid": "P430005175C4C7810"
+                },
+                "definition": "SELECT DISTINCT sport_type From Activity",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Sport type",
+                "multi": true,
+                "name": "sport_type",
+                "options": [],
+                "query": "SELECT DISTINCT sport_type From Activity",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            },
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": false,
+                    "text": ["All"],
+                    "value": ["$__all"]
+                },
+                "datasource": {
+                    "type": "mysql",
+                    "uid": "P430005175C4C7810"
+                },
+                "definition": "SELECT DISTINCT type From Activity",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Type",
+                "multi": true,
+                "name": "regular_type",
+                "options": [],
+                "query": "SELECT DISTINCT type From Activity",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            },
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": false,
+                    "text": ["All"],
+                    "value": ["$__all"]
+                },
+                "datasource": {
+                    "type": "mysql",
+                    "uid": "P430005175C4C7810"
+                },
+                "definition": "SELECT DISTINCT \n    CASE \n        WHEN workout_type = 2 THEN 'Long run'\n        WHEN workout_type IN (1,11) THEN 'Race'\n        WHEN workout_type IN (12, 3) THEN 'Workout'\n        ELSE 'Other' \n    END AS workout_type_label\nFROM Activity \nWHERE workout_type IS NOT NULL \n  AND workout_type NOT IN (10, 0);",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Workout type",
+                "multi": true,
+                "name": "workout_type",
+                "options": [],
+                "query": "SELECT DISTINCT \n    CASE \n        WHEN workout_type = 2 THEN 'Long run'\n        WHEN workout_type IN (1,11) THEN 'Race'\n        WHEN workout_type IN (12, 3) THEN 'Workout'\n        ELSE 'Other' \n    END AS workout_type_label\nFROM Activity \nWHERE workout_type IS NOT NULL \n  AND workout_type NOT IN (10, 0);",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            },
+            {
+                "allValue": "'All'",
+                "current": {
+                    "selected": true,
+                    "text": ["All"],
+                    "value": ["$__all"]
+                },
+                "datasource": {
+                    "type": "mysql",
+                    "uid": "P430005175C4C7810"
+                },
+                "definition": "SELECT DISTINCT trainer From Activity",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Trainer",
+                "multi": true,
+                "name": "trainer",
+                "options": [],
+                "query": "SELECT DISTINCT trainer From Activity",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            }
+        ]
     },
     "time": {
-        "from": "now-6M",
+        "from": "2023-11-30T23:00:00.000Z",
         "to": "now"
     },
     "timepicker": {},
     "timezone": "browser",
-    "title": "Treadmill",
-    "uid": "dfdipjb9oxwqoe",
-    "version": 2,
-    "weekStart": ""
+    "title": "Calories",
+    "uid": "fdxyz5yohyuiof",
+    "version": 9,
+    "weekStart": "monday"
 }
