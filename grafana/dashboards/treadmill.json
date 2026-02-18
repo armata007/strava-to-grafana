@@ -41,11 +41,11 @@
                             },
                             {
                                 "color": "orange",
-                                "value": 70
+                                "value": 30
                             },
                             {
                                 "color": "red",
-                                "value": 85
+                                "value": 60
                             }
                         ]
                     }
@@ -218,11 +218,11 @@
                             },
                             {
                                 "color": "orange",
-                                "value": 70
+                                "value": 30
                             },
                             {
                                 "color": "red",
-                                "value": 85
+                                "value": 60
                             }
                         ]
                     }
@@ -296,7 +296,6 @@
                         "mode": "thresholds"
                     },
                     "mappings": [],
-                    "max": 500,
                     "min": 0,
                     "thresholds": {
                         "mode": "percentage",
@@ -395,11 +394,11 @@
                             },
                             {
                                 "color": "orange",
-                                "value": 70
+                                "value": 30
                             },
                             {
                                 "color": "red",
-                                "value": 85
+                                "value": 60
                             }
                         ]
                     }
@@ -473,7 +472,6 @@
                         "mode": "thresholds"
                     },
                     "mappings": [],
-                    "max": 32,
                     "min": 0,
                     "thresholds": {
                         "mode": "percentage",
@@ -572,11 +570,11 @@
                             },
                             {
                                 "color": "orange",
-                                "value": 70
+                                "value": 30
                             },
                             {
                                 "color": "red",
-                                "value": 85
+                                "value": 60
                             }
                         ]
                     }
@@ -743,6 +741,6 @@
     "timezone": "browser",
     "title": "Treadmill",
     "uid": "dfdipjb9oxwqoe",
-    "version": 2,
+    "version": 3,
     "weekStart": ""
 }
