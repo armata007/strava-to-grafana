@@ -56,6 +56,7 @@ services:
         networks:
             - web
     prisma-studio:
+        restart: unless-stopped
         image: node:22.8.0
         working_dir: /usr/src/app
         volumes:
