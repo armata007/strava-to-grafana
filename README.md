@@ -22,11 +22,12 @@ Two app endpoints:
     API, counts cached files. Throws 500 on the first failing check. Hits the Strava rate limit if
     polled aggressively, so don't wire it into automated polling.
 
-All three containers report health to Docker (`docker compose ps` shows the status):
+Every container reports health to Docker (`docker compose ps` shows the status):
 
 -   `web` - node fetch against `/healthcheck/live`
 -   `db` - `mysqladmin ping`
 -   `grafana` - `/api/health`
+-   `prisma-studio` - node fetch against `/`, which stays 200 even when the DB is down
 
 `web` and `prisma-studio` wait for `db` to be healthy before starting.
 
