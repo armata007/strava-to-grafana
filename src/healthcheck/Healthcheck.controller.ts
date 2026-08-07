@@ -15,6 +15,11 @@ export class HealthcheckController {
         private envsService: DynamicConfigService,
     ) {}
 
+    @Get('live')
+    live(): { statusCode: 200; uptime: number } {
+        return { statusCode: 200, uptime: process.uptime() };
+    }
+
     @Get()
     async healthcheck(): Promise<{
         dbConnection: boolean;

@@ -13,6 +13,23 @@
 -   dashboard for activities (without calories as well)
 -   some text to dashboard - is it possible?
 
+## Healthchecks
+
+Two app endpoints:
+
+-   `GET /healthcheck/live` - liveness. Process-only, no external calls, safe to poll often.
+-   `GET /healthcheck` - readiness/deep. Checks DB, refreshes the Strava token and hits the Strava
+    API, counts cached files. Throws 500 on the first failing check. Hits the Strava rate limit if
+    polled aggressively, so don't wire it into automated polling.
+
+All three containers report health to Docker (`docker compose ps` shows the status):
+
+-   `web` - node fetch against `/healthcheck/live`
+-   `db` - `mysqladmin ping`
+-   `grafana` - `/api/health`
+
+`web` and `prisma-studio` wait for `db` to be healthy before starting.
+
 ## Init
 
 1. clone repository
